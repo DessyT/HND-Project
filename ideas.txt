@@ -1,0 +1,22 @@
+Crypto Tracker
+
+Scrape various crypto values from web. Allow user to enter quantity purchased, and save to external database. 
+Options to create a pie chart of crypto holding distributions and output to external file.
+GUI using app.jar
+
+Start form: Asks user to specify file to open, or create new
+Main form: Display current crypto balance total.
+	Button to display/edit holding of each coin
+	Button to toggle display type (BTC/USD/GBP/EUR)
+	Button to open different file
+	Button to save to new file
+	Button to generate pie chart
+	Quit button
+
+Use case:
+Actors:
+User - Select database, display/edit holdings, add holdings, generate pie chart, quit
+coinmarketcap - scrape current values for currencies
+external database - save/open
+
+Use cases:
