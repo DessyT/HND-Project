@@ -135,29 +135,39 @@ function mainForm():
 	
 function readForm():
 	
+	generate form layout
+
 	on button press: readFile(file_dir)
 	on cancel press hide form and show mainForm
 
 function saveForm():
 	
+	generate form layout
+
 	on button press: savefile(file_dir)
 	on cancel press hide form and show mainForm
 
 function editForm():
 	
+	generate form layout
+
 	on button press: editHoldings(coin_name)
 	on cancel press hide form and show mainForm
 	
 function addForm():
-	
+
+	generate form layout	
+
 	on button press: editHoldings(coin_name)
 	on cancel press hide form and show mainForm	
 	
 function createForm():
 
+	generate form layout
+
 	on button press: createFile(file_dir)
 	on cancel press hide form and show mainForm
-	
+
 initialForm()
 	
 	

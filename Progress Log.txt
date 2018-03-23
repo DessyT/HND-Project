@@ -1,0 +1,25 @@
+8/3/18
+Began coding interface
+appJar imported and finished the layout for initial form, main form and add transaction form
+Code varies from given pseudocode, due to limitations of appjar. It is not possible to have each form held within its own function as I had hoped. This is because there can only be one gui instance running at a time, and subwindows must be created from that.
+Designs differ slightly to those given in Analysis and Design document, again due to limitations of appjar
+
+15/3/18
+Finished coding of interface for rest of buttons excluding the chart generator. Some changes needed to design again:
+Edit form cannot have same widget names as Add form, so have had to rename some
+File selection and both new and existing save form use standard windows select and save dialogs rather than custom ones
+Only non-functional buttons now are "Toggle Currency" and "Generate Pie Chart" ones, as these will require more library imports, and further complications
+Downloaded MySQL Module for python to begin database work
+Got database manipulation working: Create database, create table, insert to table, modify insert and fetch data for display
+Added row to entity model in Design for data types
+
+22/3/18
+Realised it is not possible to have open and store files locally using mySQL library with python, using sqlite3 instead.
+Functionality for creating new database files, opening existing all working.
+Started to get adding new purchases and editing working. Tables are updating just need to output them
+
+23/3/18
+Finished implementing file read and create functions
+Finished implementing coin edit and add functions
+Also made change folio button functional
+Listbox now updates when any of the above functions are called
