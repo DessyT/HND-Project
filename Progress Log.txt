@@ -23,3 +23,7 @@ Finished implementing file read and create functions
 Finished implementing coin edit and add functions
 Also made change folio button functional
 Listbox now updates when any of the above functions are called
+
+25/3/18
+Made coin value scrape function
+Returns to listbox upon any action

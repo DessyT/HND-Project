@@ -174,13 +174,14 @@ def createTable(dbloc,main):
     #Clear listbox
     main.clearListBox("Holdings")
     #Loop through all items and add to box
+    counter = 0
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + scrapeCoin(counter,dbloc)))
+        counter = counter + 1
     
 #Must import gui object
 def readTable(dbloc,main):
@@ -193,18 +194,15 @@ def readTable(dbloc,main):
     #Clear listbox
     main.clearListBox("Holdings")
     #Loop through all items and add to box
-    i = 0
+    counter = 0
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
         
-        #main.addListItem("Holdings",(str(row[0]) + "\n Current Price scrapeCoin(i,dbloc)) +\nHoldings " + str(row[2]) + "\nHoldings value ")) #+ str(calcVal(i,dbloc)
-        i = i+ 1
-
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + scrapeCoin(counter,dbloc)))
+        counter = counter + 1
     
 def insert(coin,amount,dbloc,main):
     #Insert into table
@@ -219,13 +217,14 @@ def insert(coin,amount,dbloc,main):
     #Clear listbox
     main.clearListBox("Holdings")
     #Loop through all items and add to box
+    counter = 0
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n :Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + scrapeCoin(counter,dbloc)))
+        counter = counter + 1
 
 def edit(coin,amount,dbloc,main):
     #Edit table
@@ -239,14 +238,16 @@ def edit(coin,amount,dbloc,main):
     sql = "select * from coins"
     recs = c.execute(sql)
     main.clearListBox("Holdings")
+    counter = 0
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        main.addListItem("Holdings",(str(row[0]) + " Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        main.addListItem("Holdings",(str(row[0]) + " Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + scrapeCoin(counter,dbloc)))
+        counter = counter + 1
 
-"""def scrapeCoin(index,dbloc):
+def scrapeCoin(index,dbloc):
     coinmarketcap = Market()
     bitcoin = coinmarketcap.ticker("bitcoin")
     litecoin = coinmarketcap.ticker("litecoin")
@@ -259,20 +260,18 @@ def edit(coin,amount,dbloc,main):
     c = db.cursor()
 
     coins = ["'Bitcoin'","'Litecoin'","'Vertcoin'"]
-        
-    outArr = []
     coinDict = {"Bitcoin":0, "Litecoin":0, "Vertcoin":0}
         
     if index == 0:
         coinDict["'Bitcoin'"] = btcout["price_usd"]
-        #valArr.append(coinArr[0] * float(holdings[0]))
+        #valArr.append(btcout * float(holdings[0]))
     elif index == 1:
         coinDict["'Litecoin'"] = ltcout["price_usd"]
-        #valArr.append(coinArr[1] * float(holdings[1]))
+        #valArr.append(ltcout * float(holdings[1]))
     elif index == 2:
         coinDict["'Vertcoin'"] = vtcout["price_usd"]
-        #valArr.append(coinArr[2] * float(holdings[2]))
+        #valArr.append(vtcout * float(holdings[2]))
                           
-    return coinDict[coins[index]]"""
+    return coinDict[coins[index]]
 
 main()
