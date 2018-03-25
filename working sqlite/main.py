@@ -1,7 +1,5 @@
 from appJar import gui
 import sqlite3
-import string
-from coinmarketcap import Market
 
 #Main form
 def main():
@@ -26,8 +24,8 @@ def main():
             print("Chart")
         elif button == "Open different folio":
             print("Open other")
-            dbloc = main.openBox("Open Different File",asFile=False,fileTypes=[('database', '*.sqlite')])
-            readTable(dbloc,main)
+            dbloc = main.openBox("Open Different File",asFile=True,fileTypes=[('database', '*.sqlite')])
+            creatTable(dbloc)
         elif button == "Save":
             print("Save")
             main.saveBox("Save Current",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=True)
@@ -47,7 +45,7 @@ def main():
             coin = ""
             coin = main.getOptionBox("Coins")
             
-            insert(coin,amount,dbloc,main)
+            insert(coin,amount,dbloc)
             
             #return to main form
             main.hideSubWindow("Add_Form")
@@ -67,7 +65,7 @@ def main():
             coin = ""
             coin = main.getOptionBox("Edit Coins")
             #Output for testing
-            edit(coin,amount,dbloc,main)
+            edit(coin,amount,dbloc)
             #Return to main form
             main.hideSubWindow("Edit_Form")
         elif button == "Edit Cancel":
@@ -81,13 +79,13 @@ def main():
             #Display file open form
             global recs
             dbloc = main.openBox("init_existing",asFile=False,parent="Init_Form",fileTypes=[('database', '*.sqlite')])
-            readTable(dbloc,main)
+            readTable(dbloc)
             main.hideSubWindow("Init_Form")
             main.show()
         #Open file save form
         elif button == "New":
             dbloc = main.saveBox("Init_New",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=False,parent="Init_Form")
-            createTable(dbloc,main)
+            createTable(dbloc)
             main.hideSubWindow("Init_Form")
             main.show()
         #End execution
@@ -154,12 +152,12 @@ def main():
     #Execute, showing the initial form first
     main.go(startWindow = "Init_Form")
     
-def createTable(dbloc,main):
+def createTable(dbloc):
     db = sqlite3.connect(dbloc)
     c = db.cursor()
 
-    c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float not null, holdings float not null, holdings_value float not null)")
-    #c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float, holdings float, holdings_value float)")
+    c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float, holdings float, holdings_value float)")
+    c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float, holdings float, holdings_value float)")
     c.execute("insert into coins (coin,price,holdings,holdings_value) values('Bitcoin','0','0','0');")
     c.execute("insert into coins (coin,price,holdings,holdings_value) values('Litecoin','0','0','0');")
     c.execute("insert into coins (coin,price,holdings,holdings_value) values('Vertcoin','0','0','0');")
@@ -168,109 +166,65 @@ def createTable(dbloc,main):
     
     sql = "select * from coins"
     recs = c.execute(sql)
-    #Clear listbox
-    main.clearListBox("Holdings")
-    #Loop through all items and add to box
+    
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))        
 
-
-#Must import gui object
-def readTable(dbloc,main):
+def readTable(dbloc):
     
     db = sqlite3.connect(dbloc)
     c = db.cursor()
 
     sql = "select * from coins"
     recs = c.execute(sql)
-    #Clear listbox
-    main.clearListBox("Holdings")
-    #Loop through all items and add to box
-    i = 0
+
+    global recs
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + scrapeCoin(i,dbloc)) + "\nHoldings " + str(row[2]) + "\nHoldings value ") #+ str(calcVal(i,dbloc)))
-        i = i+ 1
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
 
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        #main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
-def insert(coin,amount,dbloc,main):
+def insert(coin,amount,dbloc):
     #Insert into table
     db = sqlite3.connect(dbloc)
     c = db.cursor()
     sql = ("update coins set holdings = (holdings + " +  str(amount) + ") where coin = '" + coin + "';")
     c.execute(sql)
     db.commit()
-
+    
     sql = "select * from coins"
     recs = c.execute(sql)
-    #Clear listbox
-    main.clearListBox("Holdings")
-    #Loop through all items and add to box
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n :Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])) 
+    
+    db.close()
 
-def edit(coin,amount,dbloc,main):
+def edit(coin,amount,dbloc):
     #Edit table
     db = sqlite3.connect(dbloc)
     c = db.cursor()
     sql = ("update coins set holdings = (" + str(amount) + ") where coin = '" + coin + "';")
     c.execute(sql)
     db.commit()
-
-    #Just for testing
+    
     sql = "select * from coins"
     recs = c.execute(sql)
-    main.clearListBox("Holdings")
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        main.addListItem("Holdings",(str(row[0]) + " Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
-def scrapeCoin(index,dbloc):
-    coinmarketcap = Market()
-    bitcoin = coinmarketcap.ticker("bitcoin")
-    litecoin = coinmarketcap.ticker("litecoin")
-    vertcoin = coinmarketcap.ticker("vertcoin")
-    btcout = bitcoin[0]   
-    ltcout = litecoin[0]
-    vtcout = vertcoin[0]
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])) 
     
-    db = sqlite3.connect(dbloc)
-    c = db.cursor()
-
-    coins = ["'Bitcoin'","'Litecoin'","'Vertcoin'"]
-        
-    outArr = []
-    coinDict = {"Bitcoin":0, "Litecoin":0, "Vertcoin":0}
-        
-    if index == 0:
-        coinDict["'Bitcoin'"] = btcout["price_usd"]
-        #valArr.append(coinArr[0] * float(holdings[0]))
-    elif index == 1:
-        coinDict["'Litecoin'"] = ltcout["price_usd"]
-        #valArr.append(coinArr[1] * float(holdings[1]))
-    elif index == 2:
-        coinDict["'Vertcoin'"] = vtcout["price_usd"]
-        #valArr.append(coinArr[2] * float(holdings[2]))
-                          
-    return coinDict[coins[index]]
-
+    db.close()
 main()
