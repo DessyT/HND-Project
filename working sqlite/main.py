@@ -1,9 +1,10 @@
 from appJar import gui
 import sqlite3
 
+
 #Main form
 def main():
-
+    global dbloc
     main = gui("Crypto Tracker", "600x300")
     #Button functions for all forms
     #Functions are grouped by form
@@ -25,7 +26,7 @@ def main():
         elif button == "Open different folio":
             print("Open other")
             dbloc = main.openBox("Open Different File",asFile=True,fileTypes=[('database', '*.sqlite')])
-            creatTable(dbloc)
+            createTable(dbloc)
         elif button == "Save":
             print("Save")
             main.saveBox("Save Current",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=True)
@@ -37,14 +38,12 @@ def main():
         ### ADD FUNCTIONS ###
             
         elif button == "Add":
-            global dbloc
             #Get number of coins
             amount = 0
             amount = main.getEntry("no_coin")
             #Get type of coin
             coin = ""
             coin = main.getOptionBox("Coins")
-            
             insert(coin,amount,dbloc)
             
             #return to main form
@@ -173,6 +172,7 @@ def createTable(dbloc):
         fholdings = row[2]
         fvalue= row[3]
         print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))        
+    
 
 def readTable(dbloc):
     
@@ -182,16 +182,17 @@ def readTable(dbloc):
     sql = "select * from coins"
     recs = c.execute(sql)
 
-    global recs
     for row in recs:
         fcoin = row[0]
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
         print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-
+    
+    
 def insert(coin,amount,dbloc):
     #Insert into table
+    
     db = sqlite3.connect(dbloc)
     c = db.cursor()
     sql = ("update coins set holdings = (holdings + " +  str(amount) + ") where coin = '" + coin + "';")
@@ -225,6 +226,6 @@ def edit(coin,amount,dbloc):
         fholdings = row[2]
         fvalue= row[3]
         print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])) 
-    
+    return dbloc
     db.close()
 main()

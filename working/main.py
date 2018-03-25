@@ -3,11 +3,12 @@ import sqlite3
 
 #Main form
 def main():
-
+    global dbloc
     main = gui("Crypto Tracker", "600x300")
     #Button functions for all forms
     #Functions are grouped by form
     def press(button):
+        
         ### START OF MAIN FORM BUTTON FUNCTIONS ###
         #Add form to be displayed
         if button == "Add a Transaction":
@@ -37,14 +38,12 @@ def main():
         ### ADD FUNCTIONS ###
             
         elif button == "Add":
-            global dbloc
             #Get number of coins
             amount = 0
             amount = main.getEntry("no_coin")
             #Get type of coin
             coin = ""
             coin = main.getOptionBox("Coins")
-            
             insert(coin,amount,dbloc,main)
             
             #return to main form
@@ -77,13 +76,14 @@ def main():
         #Open file select form
         if button == "Existing":
             #Display file open form
-            global recs
+            
             dbloc = main.openBox("init_existing",asFile=False,parent="Init_Form",fileTypes=[('database', '*.sqlite')])
             readTable(dbloc,main)
             main.hideSubWindow("Init_Form")
             main.show()
         #Open file save form
         elif button == "New":
+            
             dbloc = main.saveBox("Init_New",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=False,parent="Init_Form")
             createTable(dbloc,main)
             main.hideSubWindow("Init_Form")
@@ -174,10 +174,10 @@ def createTable(dbloc,main):
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
         main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
-
+    db.close()
+    
 #Must import gui object
 def readTable(dbloc,main):
     
@@ -186,6 +186,7 @@ def readTable(dbloc,main):
 
     sql = "select * from coins"
     recs = c.execute(sql)
+    db.commit()
     #Clear listbox
     main.clearListBox("Holdings")
     #Loop through all items and add to box
@@ -194,10 +195,11 @@ def readTable(dbloc,main):
         fprice = row[1]
         fholdings = row[2]
         fvalue= row[3]
-        #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
 
+        print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
     db.close()
+    
 def insert(coin,amount,dbloc,main):
     #Insert into table
     db = sqlite3.connect(dbloc)
@@ -218,7 +220,7 @@ def insert(coin,amount,dbloc,main):
         fvalue= row[3]
         #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
         main.addListItem("Holdings",(str(row[0]) + "\n :Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
+    
     db.close()
 
 def edit(coin,amount,dbloc,main):

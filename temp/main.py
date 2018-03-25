@@ -39,10 +39,13 @@ def main():
         ### ADD FUNCTIONS ###
             
         elif button == "Add":
-            global dbloc
+            dbloc = ""
             #Get number of coins
             amount = 0
             amount = main.getEntry("no_coin")
+            #Get number of coins
+            coin_amount = 0
+            coin_amount = main.getEntry("no_coin")
             #Get type of coin
             coin = ""
             coin = main.getOptionBox("Coins")
@@ -198,7 +201,7 @@ def readTable(dbloc,main):
         fholdings = row[2]
         fvalue= row[3]
         
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + scrapeCoin(i,dbloc)) + "\nHoldings " + str(row[2]) + "\nHoldings value ") #+ str(calcVal(i,dbloc)))
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price scrapeCoin(i,dbloc)) +\nHoldings " + str(row[2]) + "\nHoldings value ")) #+ str(calcVal(i,dbloc)
         i = i+ 1
 
         #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
@@ -244,7 +247,7 @@ def edit(coin,amount,dbloc,main):
         fvalue= row[3]
         main.addListItem("Holdings",(str(row[0]) + " Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
 
-def scrapeCoin(index,dbloc):
+"""def scrapeCoin(index,dbloc):
     coinmarketcap = Market()
     bitcoin = coinmarketcap.ticker("bitcoin")
     litecoin = coinmarketcap.ticker("litecoin")
@@ -271,6 +274,6 @@ def scrapeCoin(index,dbloc):
         coinDict["'Vertcoin'"] = vtcout["price_usd"]
         #valArr.append(coinArr[2] * float(holdings[2]))
                           
-    return coinDict[coins[index]]
+    return coinDict[coins[index]]"""
 
 main()
