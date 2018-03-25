@@ -2,14 +2,15 @@ from appJar import gui
 import sqlite3
 import string
 from coinmarketcap import Market
+dbloc = ""
 
 #Main form
 def main():
-
     main = gui("Crypto Tracker", "600x300")
     #Button functions for all forms
     #Functions are grouped by form
     def press(button):
+        global dbloc
         ### START OF MAIN FORM BUTTON FUNCTIONS ###
         #Add form to be displayed
         if button == "Add a Transaction":
@@ -39,7 +40,6 @@ def main():
         ### ADD FUNCTIONS ###
             
         elif button == "Add":
-            dbloc = ""
             #Get number of coins
             amount = 0
             amount = main.getEntry("no_coin")
@@ -82,7 +82,6 @@ def main():
         #Open file select form
         if button == "Existing":
             #Display file open form
-            global recs
             dbloc = main.openBox("init_existing",asFile=False,parent="Init_Form",fileTypes=[('database', '*.sqlite')])
             readTable(dbloc,main)
             main.hideSubWindow("Init_Form")
@@ -160,6 +159,7 @@ def main():
 def createTable(dbloc,main):
     db = sqlite3.connect(dbloc)
     c = db.cursor()
+    print(dbloc)
 
     c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float not null, holdings float not null, holdings_value float not null)")
     #c.execute("CREATE TABLE if not exists coins (coin varchar(10) not null, price float, holdings float, holdings_value float)")
@@ -181,13 +181,12 @@ def createTable(dbloc,main):
         fvalue= row[3]
         #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
         main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
-
+    
 #Must import gui object
 def readTable(dbloc,main):
-    
     db = sqlite3.connect(dbloc)
     c = db.cursor()
+    print(dbloc)
 
     sql = "select * from coins"
     recs = c.execute(sql)
@@ -201,12 +200,12 @@ def readTable(dbloc,main):
         fholdings = row[2]
         fvalue= row[3]
         
-        main.addListItem("Holdings",(str(row[0]) + "\n Current Price scrapeCoin(i,dbloc)) +\nHoldings " + str(row[2]) + "\nHoldings value ")) #+ str(calcVal(i,dbloc)
+        #main.addListItem("Holdings",(str(row[0]) + "\n Current Price scrapeCoin(i,dbloc)) +\nHoldings " + str(row[2]) + "\nHoldings value ")) #+ str(calcVal(i,dbloc)
         i = i+ 1
 
         #print(row[0] + "\nCurrent Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3]))
-        #main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
-
+        main.addListItem("Holdings",(str(row[0]) + "\n Current Price " + str(row[1]) + "\nHoldings " + str(row[2]) + "\nHoldings value " + str(row[3])))
+    
 def insert(coin,amount,dbloc,main):
     #Insert into table
     db = sqlite3.connect(dbloc)
