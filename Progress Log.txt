@@ -27,3 +27,8 @@ Listbox now updates when any of the above functions are called
 25/3/18
 Made coin value scrape function
 Returns to listbox upon any action
+
+29/3/18
+Completed implementation of pie chart and currency toggle
+Made label at top update with actual total value
+All implementation complete, just needs testing now
