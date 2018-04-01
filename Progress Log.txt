@@ -32,3 +32,8 @@ Returns to listbox upon any action
 Completed implementation of pie chart and currency toggle
 Made label at top update with actual total value
 All implementation complete, just needs testing now
+
+1/4/18
+Attempted to create a standalone .exe file
+plotly is not integrated well with pyinstaller and couldn't make this work. Switched from using plotly library to matplotlib to output the Pie Chart
+File is now compiled succesfully, however cannot display an icon

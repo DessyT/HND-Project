@@ -1,21 +1,26 @@
+#Import libabries
 from appJar import gui
 import sqlite3
 import string
 from coinmarketcap import Market
-from plotly.offline import plot
-import plotly.graph_objs as go
-import plotly
+import matplotlib.pyplot as plt
+
 import requests
 import json
 
-num = 0
+#Variable to keep track of current currency
+global num
+global ref
+ref = True
+num = 2
 
 #Main form
 def main():
-    main = gui("Crypto Tracker", "1000x400")
+    main = gui("Crypto Tracker", "1000x400", showIcon=False)
     #Button functions for all forms
     #Functions are grouped by form
     def press(button):
+        #Dbloc is required by most functions
         global dbloc
         
         ### START OF MAIN FORM BUTTON FUNCTIONS ###
@@ -34,7 +39,6 @@ def main():
         #Toggle currency displayed
         elif button == "Toggle Currency":
             global num
-
             #num keeps track of what currency we're on
             if num == 0:
                 currencyTog(dbloc,0,main)
@@ -49,7 +53,7 @@ def main():
         #Generate a pie chart
         elif button == "Generate Pie Chart":
             #Get location and name
-            pieloc = main.saveBox("Save Current",asFile=False,fileTypes=[('html','*.html')])
+            pieloc = main.saveBox("Save Current",asFile=False,fileTypes=[('png','*.png')])
             #Generate pie chart
             genPie(dbloc,pieloc)
 
@@ -59,9 +63,11 @@ def main():
             #Store old location incase there is error opening new one
             oldLoc = dbloc
             dbloc = main.openBox("Open Different File",asFile=False,fileTypes=[('database', '*.sqlite')])
-            #Read function
+
+            #Read function with error handling
             try:
                 dsp(dbloc,main)
+            #If new folio can't be opened, display current
             except:
                 dsp(oldLoc,main)
             
@@ -71,8 +77,13 @@ def main():
             #Store old location incase there is error opening new one
             oldLoc = dbloc
             newloc = main.saveBox("Save Current",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=False)
-            #Save function
+
+            #Save function with error handling
+            
             saveNew(newloc,oldLoc,main)
+            #If new folio can't be saved, display current
+            #except:
+             #   dsp(oldLoc,main)
             
         elif button == "Quit":
             #Exit the program
@@ -177,7 +188,8 @@ def main():
     main.addButton("Open different folio",press,5,0,0,1)
     main.addButton("Save",press,5,1,0,1)
     main.addButton("Quit",press,5,3,0,1)
-    main.addListBox("Holdings", [""],1,1,3,4)
+    #main.addListBox("Holdings", [""],1,1,3,4)
+    main.addTable("Holdings_table",[["Coin","Current Price","Holdings","Holdings Value"]],1,1,3,4)
     ### END OF MAIN FORM LAYOUT ###
     
     ### START ADD SUBWINDOW ###
@@ -214,9 +226,6 @@ def main():
 
 #Save to a new file
 def saveNew(newloc,old,main):
-
-    #Clear listbox
-    main.clearListBox("Holdings")
 
     #Create old and new database objects and cursors
     old = sqlite3.connect(old)
@@ -298,7 +307,6 @@ def edit(coin,amount,dbloc,main):
 
     #SQL to edit holdings values
     sql = ("update coins set holdings = (" + str(amount) + ") where coin = '" + coin + "';")
-    print(amount)
     
     c.execute(sql)
     db.commit()
@@ -374,39 +382,11 @@ def calcVal(dbloc):
 #Function to update listbox 
 def dsp(dbloc,main):
 
-    #Clear listbox
-    main.clearListBox("Holdings")
-    
-    #Connect to database
-    db = sqlite3.connect(dbloc)
-    c = db.cursor()
-
     #Always calculate value here to show most relevant price
     calcVal(dbloc)
 
-    #Select all to display from database
-    sql = "select * from coins"
-    recs = c.execute(sql)
-    
-    counter = 0
-
-    total = 0
-    #Loop through records and add each to listbox
-    for row in recs:
-        #Calc total
-        total = total + row[3]
-        
-        #Format output to 2 dp
-        currentPrice = "%0.2f" % float(scrapeCoin(counter,dbloc))
-        holdings = "%0.2f" % row[2]
-        value = "%0.2f" % row[3]        
-
-        #Add each item to listbox
-        main.addListItem("Holdings",(str(row[0]) + " price:$" + currentPrice + " Holdings:" + holdings + " Holdings value:$" + value))
-        counter = counter + 1
-        
-    #Update top label item
-    main.setLabel("totalval", "Total holdings value $" + "%0.2f" % total)
+    #Display in correct currency
+    currencyTog(dbloc,num,main)
 
 #Generates a pie chart of holdings value
 def genPie(dbloc,pieloc):
@@ -418,26 +398,28 @@ def genPie(dbloc,pieloc):
     #Select coin and holdings value from db
     sql = "select coin, holdings_value from coins"
     recs = c.execute(sql)
-
+    
     #Init arrays for values
     labels = []
     values = []
-
+    colours = ["gold","green","blue","red"]
+    
     #Load data into arrays
     for row in recs:
         labels.append(row[0])
         values.append(row[1])
-    print(labels,values)
-    
-    #Generate pie chart and output
-    trace = go.Pie(labels=labels,values=values)
-    plot([trace],filename=pieloc)
+
+    plt.pie(values,labels=labels)
+    plt.axis("equal")
+    plt.savefig(pieloc,bbox_inches='tight')
+
 
 #Toggles currency displayed in listbox and with label at top of form
 #Does not update DB as this will cause errors later since coin prices are returned from scrape in USD
 def currencyTog(dbloc,index,main):
 
-    main.clearListBox("Holdings")
+    #main.clearListBox("Holdings")
+    main.deleteAllTableRows("Holdings_table")
 
     #Connect to database
     db = sqlite3.connect(dbloc)
@@ -472,9 +454,9 @@ def currencyTog(dbloc,index,main):
             total = total + row[3]
             
             #Update displays
-            main.addListItem("Holdings",(str(row[0]) + " price:£" + str(GBP_price) + " Holdings:" + holdings + " Holdings value:£" + str(GBP_hold)))
             main.setLabel("totalval", "Total holdings value £" + "%0.2f" % (total * GBP_rate))
-            
+            main.addTableRow("Holdings_table",[row[0],"£" + str(GBP_price),row[2],"£" + str(GBP_hold)])
+
         #Go to EUR
         elif index == 1:
             #Get conv rate from dict
@@ -485,15 +467,16 @@ def currencyTog(dbloc,index,main):
             total = total + row[3]
             
             #Update displays
-            main.addListItem("Holdings",(str(row[0]) + " price €" + str(EUR_price) + " Holdings:" + holdings + " Holdings value:€" + str(EUR_hold)))
             main.setLabel("totalval", "Total holdings value €" + "%0.2f" % (total * EUR_rate))
-
+            main.addTableRow("Holdings_table",[row[0],"€" + str(EUR_price),row[2],"€" + str(EUR_hold)])
+            
         #Go to USD
         elif index == 2:
             total = total + row[3]
             #Update display, no need to calc as we are reading straight from DB
-            main.addListItem("Holdings",(str(row[0]) + " price:$" + currentPrice + " Holdings:" + holdings + " Holdings value:$" + value))
             main.setLabel("totalval", "Total holdings value $" + "%0.2f" % total)
+            main.addTableRow("Holdings_table",[row[0],"$" + str(currentPrice),holdings,"$" + str(value)])
+            
         counter = counter + 1
     
 #Go
