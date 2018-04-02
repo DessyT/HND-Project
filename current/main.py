@@ -8,11 +8,8 @@ import matplotlib.pyplot as plt
 import requests
 import json
 
-#Variable to keep track of current currency
-global num
-global ref
-ref = True
-num = 2
+#Keeps track of currency. Starts on GBP
+num = 1
 
 #Main form
 def main():
@@ -38,17 +35,8 @@ def main():
 
         #Toggle currency displayed
         elif button == "Toggle Currency":
-            global num
-            #num keeps track of what currency we're on
-            if num == 0:
-                currencyTog(dbloc,0,main)
-                num = 1
-            elif num == 1:
-                currencyTog(dbloc,1,main)
-                num = 2
-            elif num == 2:
-                currencyTog(dbloc,2,main)
-                num = 0
+            
+            dsp(dbloc,main,True)
 
         #Generate a pie chart
         elif button == "Generate Pie Chart":
@@ -66,10 +54,10 @@ def main():
 
             #Read function with error handling
             try:
-                dsp(dbloc,main)
+                dsp(dbloc,main,False)
             #If new folio can't be opened, display current
             except:
-                dsp(oldLoc,main)
+                dsp(oldLoc,main,False)
             
         #Save as dialog
         elif button == "Save":
@@ -79,11 +67,7 @@ def main():
             newloc = main.saveBox("Save Current",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=False)
 
             #Save function with error handling
-            
             saveNew(newloc,oldLoc,main)
-            #If new folio can't be saved, display current
-            #except:
-             #   dsp(oldLoc,main)
             
         elif button == "Quit":
             #Exit the program
@@ -97,19 +81,25 @@ def main():
             #Get number of coins
             amount = 0
             amount = main.getEntry("no_coin")
-            #Get number of coins
-            coin_amount = 0
-            coin_amount = main.getEntry("no_coin")
-            #Get type of coin
-            coin = ""
-            coin = main.getOptionBox("Coins")
 
-            #Insert into database
-            insert(coin,amount,dbloc,main)
-            
-            #return to main form
-            main.hideSubWindow("Add_Form")
+            #Input validation; amount input must not be positive
+            if amount is not None and amount > 0:
+                if amount > 0:
+                    
+                    #Get type of coin
+                    coin = ""
+                    coin = main.getOptionBox("Coins")
 
+                    #Insert into database
+                    insert(coin,amount,dbloc,main)
+                    
+                    #return to main form
+                    main.hideSubWindow("Add_Form")
+
+            #Else show error
+            else:
+                main.errorBox("Error", "Please enter a number > 0", parent="Add_Form")
+                
         #If cancel is pressed return to main form
         elif button == "Cancel":
             main.hideSubWindow("Add_Form")
@@ -121,15 +111,22 @@ def main():
             #Get new no coins
             amount = 0
             amount = main.getEntry("edit_no_coin")
-            #Get coin type
-            coin = ""
-            coin = main.getOptionBox("Edit Coins")
-            
-            #Edit database values
-            edit(coin,amount,dbloc,main)
-            
-            #Return to main form
-            main.hideSubWindow("Edit_Form")
+
+            #Input validation; input number must be positive
+            if amount is not None and amount >= 0:
+        
+                #Get coin type
+                coin = ""
+                coin = main.getOptionBox("Edit Coins")
+                
+                #Edit database values
+                edit(coin,amount,dbloc,main)
+                
+                #Return to main form
+                main.hideSubWindow("Edit_Form")
+            else:    
+                main.errorBox("Error", "Please enter a number > 0", parent="Edit_Form")
+
 
         #If cancel button is pressed return to main form
         elif button == "Edit Cancel":
@@ -140,21 +137,26 @@ def main():
             
         #Open file select form
         if button == "Existing":
+            
             #Display file open dialog
             dbloc = main.openBox("init_existing",asFile=False,parent="Init_Form",fileTypes=[('database', '*.sqlite')])
+
             #Read database
-            dsp(dbloc,main)
+            dsp(dbloc,main,False)
             
             #Hide first window and show main
             main.hideSubWindow("Init_Form")
             main.show()
+
             
         #Open file save form
         elif button == "New":
+            
             #Display file create dialog
             dbloc = main.saveBox("Init_New",fileExt=".sqlite",fileTypes=[('database','*.sqlite')],asFile=False,parent="Init_Form")
+
             #Create database and table
-            createTable(dbloc,main)
+            createTable(dbloc,main,False)
 
             #Hide first window and show main
             main.hideSubWindow("Init_Form")
@@ -252,10 +254,9 @@ def saveNew(newloc,old,main):
             counter = counter + 1
 
         #Update listbox
-        dsp(dbloc,main)
-        
+        dsp(dbloc,main,False)
     except:
-        dsp(old,main)
+        dsp(old,main,False)
     #Commit changes and close databases
     
     db.commit()
@@ -279,7 +280,7 @@ def createTable(dbloc,main):
     db.commit()
     
     #Update listbox
-    dsp(dbloc,main)
+    dsp(dbloc,main,False)
 
 #Add new holdings to those previously held in db
 def insert(coin,amount,dbloc,main):
@@ -294,7 +295,7 @@ def insert(coin,amount,dbloc,main):
     db.commit()
 
     #Update listbox
-    dsp(dbloc,main)
+    dsp(dbloc,main,False)
 
     db.close()
     
@@ -312,7 +313,7 @@ def edit(coin,amount,dbloc,main):
     db.commit()
 
     #Update listbox
-    dsp(dbloc,main)
+    dsp(dbloc,main,False)
 
     db.close()
     
@@ -361,6 +362,7 @@ def calcVal(dbloc):
     
     counter = 0
     total = 0
+    
     #Append value of each coin * holding to array
     for row in vals:
         #Load current value into array
@@ -380,13 +382,18 @@ def calcVal(dbloc):
     db.close()
 
 #Function to update listbox 
-def dsp(dbloc,main):
+def dsp(dbloc,main,tog):
 
     #Always calculate value here to show most relevant price
     calcVal(dbloc)
 
-    #Display in correct currency
-    currencyTog(dbloc,num,main)
+    main.deleteAllTableRows("Holdings_table")
+
+    if tog == True:
+        currencyTog(dbloc,num,main,True)
+    else:
+        currencyTog(dbloc,num,main,False)
+
 
 #Generates a pie chart of holdings value
 def genPie(dbloc,pieloc):
@@ -416,9 +423,8 @@ def genPie(dbloc,pieloc):
 
 #Toggles currency displayed in listbox and with label at top of form
 #Does not update DB as this will cause errors later since coin prices are returned from scrape in USD
-def currencyTog(dbloc,index,main):
-
-    #main.clearListBox("Holdings")
+def currencyTog(dbloc,index,main,tog):
+    global num
     main.deleteAllTableRows("Holdings_table")
 
     #Connect to database
@@ -435,17 +441,18 @@ def currencyTog(dbloc,index,main):
     data = response.text
     parsed = json.loads(data)
 
+    toggle = tog
     counter = 0
     total,subtotal = 0,0
+    
     for row in recs:
-
         #Formatting output
         currentPrice = "%0.2f" % float(scrapeCoin(counter,dbloc))
-        holdings = "%0.2f" % row[2]
+        holdings = "%0.8f" % row[2]
         value = "%0.2f" % row[3]
         
-        #Go to GBP
-        if index == 0:
+        #Go to GBP if toggle has been pressed
+        if index == 0 and tog == True:
             #Get conv rate from dict
             GBP_rate = (parsed["rates"]["GBP"])
             #Convert USD to GBP
@@ -455,10 +462,21 @@ def currencyTog(dbloc,index,main):
             
             #Update displays
             main.setLabel("totalval", "Total holdings value £" + "%0.2f" % (total * GBP_rate))
-            main.addTableRow("Holdings_table",[row[0],"£" + str(GBP_price),row[2],"£" + str(GBP_hold)])
+            main.addTableRow("Holdings_table",[row[0],"£" + str(GBP_price),holdings,"£" + str(GBP_hold)])
 
-        #Go to EUR
-        elif index == 1:
+            #Go to next currency next time toggle is pressed
+            num = 1
+
+        #Else refresh $ display
+        elif index == 0 and tog == False:
+            total = total + row[3]
+            #Update display, no need to calc as we are reading straight from DB
+            main.setLabel("totalval", "Total holdings value $" + "%0.2f" % total)
+            main.addTableRow("Holdings_table",[row[0],"$" + str(currentPrice),holdings,"$" + str(value)])
+            
+            
+        #Go to EUR if toggle has been pressed
+        elif index == 1 and tog == True:
             #Get conv rate from dict
             EUR_rate = (parsed["rates"]["EUR"])
             #Convert USD to EUR
@@ -468,16 +486,50 @@ def currencyTog(dbloc,index,main):
             
             #Update displays
             main.setLabel("totalval", "Total holdings value €" + "%0.2f" % (total * EUR_rate))
-            main.addTableRow("Holdings_table",[row[0],"€" + str(EUR_price),row[2],"€" + str(EUR_hold)])
+            main.addTableRow("Holdings_table",[row[0],"€" + str(EUR_price),holdings,"€" + str(EUR_hold)])
+
+            #Go to next currency next time toggle is pressed
+            num = 2
             
-        #Go to USD
-        elif index == 2:
+        #Else refresh £
+        elif index == 1 and tog == False:
+            #Get conv rate from dict
+            GBP_rate = (parsed["rates"]["GBP"])
+            #Convert USD to GBP
+            GBP_price = "%0.2f" % (GBP_rate * float(scrapeCoin(counter,dbloc)))
+            GBP_hold = "%0.2f" % (GBP_rate * row[3])
+            total = total + row[3]
+            
+            #Update displays
+            main.setLabel("totalval", "Total holdings value £" + "%0.2f" % (total * GBP_rate))
+            main.addTableRow("Holdings_table",[row[0],"£" + str(GBP_price),holdings,"£" + str(GBP_hold)])
+            
+        #Go to USD if toggle has been pressed
+        elif index == 2 and tog == True:
             total = total + row[3]
             #Update display, no need to calc as we are reading straight from DB
             main.setLabel("totalval", "Total holdings value $" + "%0.2f" % total)
             main.addTableRow("Holdings_table",[row[0],"$" + str(currentPrice),holdings,"$" + str(value)])
+
+            #Go to next currency next time toggle is pressed
+            num = 0
+
+            
+        #Else stay on EUR
+        elif index == 2 and tog == False:
+            #Get conv rate from dict
+            EUR_rate = (parsed["rates"]["EUR"])
+            #Convert USD to EUR
+            EUR_price = "%0.2f" % (EUR_rate * float(scrapeCoin(counter,dbloc)))
+            EUR_hold = "%0.2f" % (EUR_rate * row[3])
+            total = total + row[3]
+            
+            #Update displays
+            main.setLabel("totalval", "Total holdings value €" + "%0.2f" % (total * EUR_rate))
+            main.addTableRow("Holdings_table",[row[0],"€" + str(EUR_price),holdings,"€" + str(EUR_hold)])
             
         counter = counter + 1
+
     
 #Go
 main()
